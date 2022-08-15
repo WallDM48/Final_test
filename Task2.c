@@ -19,11 +19,10 @@ int main(int argc, char **argv){
         return EXIT_FAILURE;
     }
     
-    for (int i = 1; i < argc; i++)
-    {
-        FILE *f = fopen(argv[i],"r");
-        pid = fork();
+    
         
+        pid = fork();
+     
         int num; 
         if(-1 == pid){
             perror("fork!\n");
@@ -31,42 +30,55 @@ int main(int argc, char **argv){
         }
         if(!pid){
             //child
-        close(fd[0]);
-        int total = 0;
+            close(fd[0]);
+            int t =0;
+        for (int i = 1; i < argc; i++)
+        {       
+            
         
+        
+        FILE *f = fopen(argv[i],"r");
         while (fscanf(f,"%d",&num) != EOF)
         {   
          
-            for (int i = 0; i < 32; i++)
+            for (int j = 0; j < 32; j++)
             {
-                if(!!(num & (1<<i))){
-                    total++;
+                if(!!(num & (1<<j))){
+                    
+                    t++;
                 }
             }
         
         
         }
-        //printf("%d\n",total[m]);
         
         
-        write(fd[1],&total,sizeof(int));
-        //free(total);
+        write(fd[1],&t,sizeof(int));
+        t=0;
+        
+        }
+        
+        close(fd[1]);
+        
         }
         else{
             //parent
         close(fd[1]);   
-        int total;
+    
+        int t;
+        for (int i = 0; i < argc -1; i++)
+        {
+            read(fd[0],&t,sizeof(int));
+            printf("Total number of 1 bit in this file is: %d\n",t);
+        }
         
-        read(fd[0],&total,sizeof(int));
-
-        printf("Total number of 1 bit in this file is: %d\n",total);
         
         close(fd[0]);
         
         }
         
 
-    }
+    
 
     for (int i = 1; i < argc; i++)
     {
